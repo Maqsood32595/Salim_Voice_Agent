@@ -68,9 +68,9 @@ router.post('/answered', async (req, res) => {
     action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
     method:        'POST',
     speechTimeout: '1', // Triggers 1 second after candidate stops speaking (eliminates 3s lag)
-    speechModel:   'phone_call',
+    speechModel:   'default',
     language:      'en-IN',
-    hints:         'yes, yeah, definitely, sure, looking, job, open to work, hiring, no, not looking, not interested, who is this',
+    hints:         'no:5, yes:5, nope:4, yeah:4, not interested:4, not looking:4, job:2, looking:2',
     timeout:       7,
   });
 
@@ -100,7 +100,7 @@ router.post('/respond', async (req, res) => {
       action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
       method:        'POST',
       speechTimeout: '1',
-      speechModel:   'phone_call',
+      speechModel:   'default',
       language:      'en-IN',
       hints:         'yes, yeah, definitely, sure, looking, job, open, no, not interested',
       timeout:       6,
@@ -124,7 +124,7 @@ router.post('/respond', async (req, res) => {
       action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
       method:        'POST',
       speechTimeout: '1',
-      speechModel:   'phone_call',
+      speechModel:   'default',
       language:      'en-IN',
       hints:         'yes, yeah, definitely, sure, looking, job, open, no, not interested',
       timeout:       6,
