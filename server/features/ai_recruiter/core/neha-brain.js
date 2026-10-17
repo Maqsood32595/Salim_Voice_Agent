@@ -43,7 +43,7 @@ export class NehaBrain {
     const session = this.getSession(sessionId);
     const hasName = session && session.candidateName && session.candidateName !== 'Candidate' && session.candidateName.trim() !== '';
     const greetingStart = hasName ? `Hi ${session.candidateName.trim()}!` : 'Hi!';
-    const text = `${greetingStart} This is Neha calling on behalf of Prodigy Hunters. Are you currently looking out for a job? You can say Yes or No.`;
+    const text = `${greetingStart} This is Neha calling on behalf of Prodigy Hunters. Are you currently looking out for a job?`;
     
     if (session) {
       session.state = CALL_STATES.WAITING_FOR_INTEREST;
@@ -68,26 +68,29 @@ export class NehaBrain {
       return 'IDENTITY_CHECK';
     }
 
-    // 2. Explicit NO / Negative patterns (Strong Priority to avoid "not looking" matching "looking")
-    const isNegative = /\b(?:no|nope|nah|never|not looking|not interested|not open|don't call|dont call|no thanks|not right now|already employed|have a job|happy with my job|not searching)\b/i.test(clean) ||
-                       /\bnot\s+(?:looking|interested|open|searching|ready|free|wanting)\b/i.test(clean) ||
-                       /\b(?:already|happily)\s+(?:working|employed|placed)\b/i.test(clean);
+    // 2. Explicit positive affirmations
+    const hasPositive = /\b(?:yes|yeah|yep|yup|sure|definitely|actively looking|looking for|looking out|open to|job change|new role|new opportunity|tell me more|what role|what job|interested|hiring)\b/i.test(clean) ||
+                        /\b(?:i am|am looking|we are looking|i'm looking|need a job|searching for a job)\b/i.test(clean);
 
-    if (isNegative) {
-      return 'NO_NOT_INTERESTED';
-    }
+    // 3. Multi-word explicit negative patterns
+    const hasStrongNegative = /\b(?:not looking|not interested|not open|don't call|dont call|no thanks|not right now|already employed|have a job|happy with my job|not searching)\b/i.test(clean) ||
+                              /\bnot\s+(?:looking|interested|open|searching|ready|free|wanting)\b/i.test(clean) ||
+                              /\b(?:already|happily)\s+(?:working|employed|placed)\b/i.test(clean);
 
-    // 3. Explicit YES / Positive patterns
-    const isPositive = /\b(?:yes|yeah|yep|yup|sure|definitely|actively looking|looking for|looking out|open to|job change|new role|new opportunity|tell me more|what role|what job|why not|interested|hiring)\b/i.test(clean) ||
-                       /\b(?:i am|am looking|we are looking|i'm looking|need a job|searching for a job)\b/i.test(clean);
+    // 4. Standalone negative words
+    const hasSimpleNo = /\b(?:no|nope|nah|never)\b/i.test(clean);
 
-    if (isPositive) {
+    // Positive takes priority when combined with standalone 'no' (e.g. echo 'yes or no' or 'yes no problem')
+    if (hasPositive && !hasStrongNegative) {
       return 'YES_INTERESTED';
     }
 
-    // If candidate just gave a short affirmation like "mm-hmm", "go on"
-    if (/^(?:mm|mhm|uh huh|okay|ok|hello|hi)$/i.test(clean)) {
-      return 'UNCLEAR_PROMPT_AGAIN';
+    if (hasStrongNegative || (hasSimpleNo && !hasPositive)) {
+      return 'NO_NOT_INTERESTED';
+    }
+
+    if (hasPositive) {
+      return 'YES_INTERESTED';
     }
 
     return 'UNCLEAR_PROMPT_AGAIN';
@@ -136,7 +139,7 @@ export class NehaBrain {
       session.state = CALL_STATES.WAITING_FOR_INTEREST;
     } 
     else {
-      replyText = "Got it! Just to quickly confirm, are you open to exploring any new job opportunities at the moment? You can say Yes or No.";
+      replyText = "Got it! Just to quickly confirm, are you open to exploring any new job opportunities at the moment?";
       session.state = CALL_STATES.WAITING_FOR_INTEREST;
     }
 

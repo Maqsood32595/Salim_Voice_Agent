@@ -68,9 +68,9 @@ router.post('/answered', async (req, res) => {
     action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
     method:        'POST',
     speechTimeout: '1', // Triggers 1 second after candidate stops speaking (eliminates 3s lag)
-    speechModel:   'default',
+    speechModel:   'phone_call',
     language:      'en-IN',
-    hints:         'no:5, yes:5, nope:4, yeah:4, not interested:4, not looking:4, job:2, looking:2',
+    hints:         'yes, yeah, definitely, sure, looking, job, open, no, not looking, not interested, who is this',
     timeout:       7,
   });
 
@@ -100,7 +100,7 @@ router.post('/respond', async (req, res) => {
       action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
       method:        'POST',
       speechTimeout: '1',
-      speechModel:   'default',
+      speechModel:   'phone_call',
       language:      'en-IN',
       hints:         'yes, yeah, definitely, sure, looking, job, open, no, not interested',
       timeout:       6,
@@ -124,7 +124,7 @@ router.post('/respond', async (req, res) => {
       action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
       method:        'POST',
       speechTimeout: '1',
-      speechModel:   'default',
+      speechModel:   'phone_call',
       language:      'en-IN',
       hints:         'yes, yeah, definitely, sure, looking, job, open, no, not interested',
       timeout:       6,
@@ -144,7 +144,7 @@ router.post('/timeout', (req, res) => {
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
   twiml.say({ voice: 'Polly.Aditi', language: 'en-IN' },
-    "No problem! Feel free to call us back anytime. Have a great day, goodbye!");
+    "Sorry, I couldn't hear your response. Please feel free to call us back anytime. Have a great day, goodbye!");
   twiml.hangup();
   res.type('text/xml').send(twiml.toString());
 });
