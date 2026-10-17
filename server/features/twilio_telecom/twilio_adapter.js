@@ -105,7 +105,7 @@ router.post('/answered', async (req, res) => {
     timeout: 5,
   });
 
-  gather.say({ voice: 'Polly.Aditi', language: 'en-IN' }, greeting.text);
+  gather.say({ voice: 'Polly.Raveena', language: 'en-IN' }, greeting.text);
 
   // If candidate stays completely silent after 10s, redirect to polite timeout
   twiml.redirect(`${base(req)}/api/twilio/timeout?sessionId=${sessionId}`);
@@ -148,7 +148,7 @@ router.post('/respond', async (req, res) => {
       bargeIn:       false,
       timeout:       8,
     });
-    gather.say({ voice: 'Polly.Aditi', language: 'en-IN' },
+    gather.say({ voice: 'Polly.Raveena', language: 'en-IN' },
       "Sorry, I did not catch that. Are you currently looking out for a job?");
     twiml.redirect(`${base(req)}/api/twilio/timeout?sessionId=${sessionId}`);
     return res.type('text/xml').send(twiml.toString());
@@ -169,7 +169,7 @@ router.post('/respond', async (req, res) => {
   });
 
   if (turn.shouldHangUp) {
-    twiml.say({ voice: 'Polly.Aditi', language: 'en-IN' }, turn.replyText);
+    twiml.say({ voice: 'Polly.Raveena', language: 'en-IN' }, turn.replyText);
     twiml.pause({ length: 1 });
     twiml.hangup();
   } else {
@@ -184,7 +184,7 @@ router.post('/respond', async (req, res) => {
       bargeIn:       false,
       timeout:       8,
     });
-    gather.say({ voice: 'Polly.Aditi', language: 'en-IN' }, turn.replyText);
+    gather.say({ voice: 'Polly.Raveena', language: 'en-IN' }, turn.replyText);
     twiml.redirect(`${base(req)}/api/twilio/timeout?sessionId=${sessionId}`);
   }
 
@@ -218,7 +218,7 @@ router.post('/timeout', (req, res) => {
       bargeIn:       false,
       timeout:       5, // 5 more seconds
     });
-    gather.say({ voice: 'Polly.Aditi', language: 'en-IN' }, "Can you please repeat your response?");
+    gather.say({ voice: 'Polly.Raveena', language: 'en-IN' }, "Can you please repeat your response?");
     
     // If still silent after 5 more seconds -> Stage 2 (10s total auto-hangup)
     twiml.redirect(`${base(req)}/api/twilio/timeout?sessionId=${sessionId}&attempt=2`);
@@ -234,7 +234,7 @@ router.post('/timeout', (req, res) => {
     notes: 'Auto-hangup after 10 seconds of silence'
   });
 
-  twiml.say({ voice: 'Polly.Aditi', language: 'en-IN' }, "Have a great day!");
+  twiml.say({ voice: 'Polly.Raveena', language: 'en-IN' }, "Have a great day!");
   twiml.hangup();
   res.type('text/xml').send(twiml.toString());
 });
