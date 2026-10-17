@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recruiter Command Center · Prodigy Hunters AI Voice Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(22, 30, 49, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.25);
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 0%, #172554 0%, var(--bg) 75%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-left h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-left p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .btn-download-excel {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 22px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      box-shadow: 0 4px 20px var(--success-glow);
+      transition: all 0.2s;
+    }
+
+    .btn-download-excel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Metric Cards Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--success);
+    }
+
+    /* Outbound Link Generator & Simulator Row */
+    .two-col-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 800px) {
+      .two-col-grid {
+        grid-template-columns: 1fr;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .btn-download-excel {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #090d16;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .link-result-box {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px dashed rgba(56, 189, 248, 0.3);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .link-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--primary);
+      word-break: break-all;
+    }
+
+    .link-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-sm:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Candidate Roster Table */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.8);
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #cbd5e1;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge-interested {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .phone-tag {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <h1>
+          <span>👩‍💼</span>
+          <span>Prodigy Hunters AI Recruiter · First Layer Filter</span>
+        </h1>
+        <p>Zero-cost neural voice outreach with automated Excel qualification</p>
+      </div>
+
+      <a href="/api/download-excel" class="btn-download-excel">
+        <span>📥</span>
+        <span>Download Excel (.xlsx)</span>
+      </a>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Interested in Excel</div>
+        <div id="statCount" class="stat-value">0</div>
+        <div class="stat-sub">🟢 Verified "Yes" Candidates</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Recruiter Persona</div>
+        <div class="stat-value" style="font-size: 20px; color: var(--primary);">Neha (Prodigy Hunters)</div>
+        <div class="stat-sub">Microsoft Edge Neural (0ms RAM)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Calling Mode</div>
+        <div class="stat-value" style="font-size: 20px; color: #a78bfa;">Web-Link Voice Dialer</div>
+        <div class="stat-sub">100% Free · Zero Telephony Fees</div>
+      </div>
+    </div>
+
+    <!-- Generator & Simulator Row -->
+    <div class="two-col-grid">
+      
+      <!-- Outbound Candidate Link Generator -->
+      <div class="card">
+        <div class="card-title">
+          <span>🔗</span>
+          <span>Generate Candidate Call Link</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          Create a personalized Web-Link to send to candidates over WhatsApp or SMS.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Candidate Full Name</label>
+          <input id="inputName" type="text" class="form-input" placeholder="e.g. Rahul Sharma" value="Rahul Sharma">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input id="inputPhone" type="text" class="form-input" placeholder="e.g. +91 98765 43210" value="+91 98765 43210">
+        </div>
+
+        <button class="btn-primary" onclick="generateLink()">
+          <span>🚀 Generate Web Call Link</span>
+        </button>
+
+        <button class="btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-top: 10px;" onclick="dialTwilioPhone()">
+          <span>📞 Call Phone Directly via Twilio</span>
+        </button>
+        <div id="twilioStatusBox" style="display: none; margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 13px;"></div>
+
+        <div id="linkBox" class="link-result-box" style="display: none;">
+          <div class="stat-label">Candidate Call URL:</div>
+          <div id="linkText" class="link-text"></div>
+          <div class="link-actions">
+            <a id="btnOpenCall" href="#" target="_blank" class="btn-sm" style="background: rgba(56, 189, 248, 0.2); color: var(--primary);">
+              <span>📞 Test Call Now</span>
+            </a>
+            <button class="btn-sm" onclick="copyLink()">
+              <span>📋 Copy Link</span>
+            </button>
+            <a id="btnWhatsApp" href="#" target="_blank" class="btn-sm" style="background: rgba(37, 211, 102, 0.2); color: #4ade80;">
+              <span>💬 WhatsApp</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Simulator / Test Bench -->
+      <div class="card">
+        <div class="card-title">
+          <span>🧪</span>
+          <span>Simulate Candidate Response</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          Test how Neha handles different candidate responses and updates Excel.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Candidate's Spoken Answer</label>
+          <select id="selectPreset" class="form-input" onchange="applyPreset()">
+            <option value="Yes, I am actively looking for a job">🟢 "Yes, I am actively looking for a job"</option>
+            <option value="Yeah, looking for new opportunities">🟢 "Yeah, looking for new opportunities"</option>
+            <option value="No, I am happy with my current job">🔴 "No, I am happy with my current job"</option>
+            <option value="Not interested right now, thanks">🔴 "Not interested right now, thanks"</option>
+            <option value="Who is this and which agency?">❓ "Who is this and which agency?"</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Or Type Custom Response</label>
+          <input id="inputCustomSpeech" type="text" class="form-input" placeholder="Type what candidate says...">
+        </div>
+
+        <button class="btn-primary" onclick="simulateTurn()">
+          <span>▶️ Run Simulation Turn</span>
+        </button>
+
+        <div id="simResultBox" class="link-result-box" style="display: none;">
+          <div style="font-size: 12px; color: #94a3b8;">
+            <strong>Neha:</strong> <span id="simGreeting"></span>
+          </div>
+          <div style="font-size: 12px; color: var(--primary); margin-top: 4px;">
+            <strong>Candidate:</strong> <span id="simCandidate"></span>
+          </div>
+          <div style="font-size: 12px; color: #34d399; margin-top: 4px;">
+            <strong>Neha Reply:</strong> <span id="simReply"></span>
+          </div>
+          <div id="simExcelStatus" style="font-size: 11px; margin-top: 6px; font-weight: 700;"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Interested Candidates Table -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="card-title">
+          <span>📊</span>
+          <span>Interested Candidates (Saved to Excel)</span>
+        </div>
+        <button class="btn-sm" onclick="loadCandidates()">
+          <span>🔄 Refresh List</span>
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Timestamp</th>
+              <th>Candidate Name</th>
+              <th>Phone Number</th>
+              <th>Status</th>
+              <th>What Candidate Said</th>
+            </tr>
+          </thead>
+          <tbody id="candidateTbody">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                No candidates saved yet. Run a call where candidate says "Yes" to auto-save to Excel!
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function generateLink() {
+      const name = document.getElementById('inputName').value.trim() || 'Candidate';
+      const phone = document.getElementById('inputPhone').value.trim() || '';
+
+      const baseUrl = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '5090')) ? 'http://localhost:5090' : window.location.origin;
+      const callUrl = `${baseUrl}/call.html?name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}`;
+      const whatsappText = `Hi ${name}, please take a 1-minute quick voice call with Neha from Prodigy Hunters recruitment team: ${callUrl}`;
+      const whatsappUrl = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappText)}`;
+
+      document.getElementById('linkText').textContent = callUrl;
+      document.getElementById('btnOpenCall').href = callUrl;
+      document.getElementById('btnWhatsApp').href = whatsappUrl;
+      document.getElementById('linkBox').style.display = 'flex';
+    }
+
+    function copyLink() {
+      const text = document.getElementById('linkText').textContent;
+      navigator.clipboard.writeText(text);
+      alert('Call link copied to clipboard!');
+    }
+
+    function applyPreset() {
+      const val = document.getElementById('selectPreset').value;
+      document.getElementById('inputCustomSpeech').value = val;
+    }
+
+    async function simulateTurn() {
+      const speech = document.getElementById('inputCustomSpeech').value || document.getElementById('selectPreset').value;
+      const name = document.getElementById('inputName').value || 'Pooja';
+      const phone = document.getElementById('inputPhone').value || '+91 98111 22233';
+
+      try {
+        const API_BASE = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '5090')) ? 'http://localhost:5090' : '';
+        const res = await fetch(API_BASE + '/api/simulate-call', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone, userSpeech: speech })
+        });
+        const data = await res.json();
+
+        document.getElementById('simGreeting').textContent = data.greeting;
+        document.getElementById('simCandidate').textContent = data.userSpeech;
+        document.getElementById('simReply').textContent = data.reply;
+        
+        const excelStatus = document.getElementById('simExcelStatus');
+        if (data.savedToExcel) {
+          excelStatus.textContent = '✅ SAVED TO EXCEL (interested_candidates.xlsx)';
+          excelStatus.style.color = '#34d399';
+        } else {
+          excelStatus.textContent = '❌ NOT SAVED (Candidate was not looking / said no - left as requested)';
+          excelStatus.style.color = '#f87171';
+        }
+
+        document.getElementById('simResultBox').style.display = 'flex';
+        loadCandidates();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadCandidates() {
+      try {
+        const API_BASE = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '5090')) ? 'http://localhost:5090' : '';
+        const res = await fetch(API_BASE + '/api/candidates');
+        const data = await res.json();
+        const tbody = document.getElementById('candidateTbody');
+        document.getElementById('statCount').textContent = data.count || 0;
+
+        if (!data.candidates || data.candidates.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                No candidates saved yet. Run a call where candidate says "Yes" to auto-save to Excel!
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = data.candidates.slice(0, 10).map((c, idx) => `
+          <tr>
+            <td>${idx + 1}</td>
+            <td style="font-size: 13px; color: #94a3b8;">${c.timestamp || new Date().toLocaleString()}</td>
+            <td style="font-weight: 700; color: #fff;">${c.name}</td>
+            <td class="phone-tag">${c.phone}</td>
+            <td><span class="badge-interested">🟢 ${c.status || 'Interested'}</span></td>
+            <td style="font-style: italic; color: #cbd5e1;">"${c.response || c.response_text || 'Yes'}"</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+      applyPreset();
+      generateLink();
+      loadCandidates();
+    });
+  
+    async function dialTwilioPhone() {
+      const name = document.getElementById('inputName').value.trim() || 'Candidate';
+      const phone = document.getElementById('inputPhone').value.trim();
+      if (!phone) {
+        alert('Please enter a phone number (e.g. +919980901155)');
+        return;
+      }
+      const statusBox = document.getElementById('twilioStatusBox');
+      statusBox.style.display = 'block';
+      statusBox.style.color = '#38bdf8';
+      statusBox.innerHTML = '⏳ Dialling <strong>' + name + '</strong> at <code>' + phone + '</code> via Twilio...';
+      try {
+        const res = await fetch('/api/twilio/dial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone })
+        });
+        const data = await res.json();
+        if (data.success) {
+          statusBox.style.color = '#4ade80';
+          statusBox.innerHTML = '✅ <strong>Call Initiated!</strong> Call SID: <code>' + data.callSid + '</code><br>Neha will greet: <em>"Hi ' + name + '! This is Neha calling on behalf of Prodigy Hunters..."</em>';
+        } else {
+          statusBox.style.color = '#f87171';
+          statusBox.innerHTML = '❌ <strong>Dial Error:</strong> ' + data.error;
+        }
+      } catch (err) {
+        statusBox.style.color = '#f87171';
+        statusBox.innerHTML = '❌ <strong>Network Error:</strong> ' + err.message;
+      }
+    }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Call with Neha · Prodigy Hunters</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(22, 30, 49, 0.7);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.35);
+      --success: #10b981;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 20%, #1e293b 0%, var(--bg) 80%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    .top-bar {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .agency-tag {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .call-status-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-weight: 500;
+    }
+
+    /* Caller Profile Section */
+    .caller-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-top: 10px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-pulse {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      background: var(--primary-glow);
+      animation: pulse 2.2s infinite ease-out;
+      opacity: 0.6;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.2; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 54px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      z-index: 2;
+    }
+
+    .caller-name {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .caller-title {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .call-timer {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+      background: rgba(56, 189, 248, 0.1);
+      padding: 4px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    /* Live Dialogue Box */
+    .dialogue-card {
+      width: 100%;
+      max-width: 420px;
+      min-height: 140px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 16px 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .dialogue-bubble {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .bubble-speaker {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .user-transcript {
+      font-size: 14px;
+      color: #94a3b8;
+      font-style: italic;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 8px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Waveform Visualizer */
+    .visualizer-container {
+      width: 100%;
+      max-width: 240px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .wave-bar {
+      width: 4px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 4px;
+      transition: height 0.1s ease;
+    }
+
+    .visualizer-container.active .wave-bar {
+      animation: wave 1.2s infinite ease-in-out;
+    }
+
+    .visualizer-container.active .wave-bar:nth-child(1) { animation-delay: 0.1s; }
+    .visualizer-container.active .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+    .visualizer-container.active .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .visualizer-container.active .wave-bar:nth-child(4) { animation-delay: 0.4s; }
+    .visualizer-container.active .wave-bar:nth-child(5) { animation-delay: 0.5s; }
+    .visualizer-container.active .wave-bar:nth-child(6) { animation-delay: 0.3s; }
+    .visualizer-container.active .wave-bar:nth-child(7) { animation-delay: 0.2s; }
+    .visualizer-container.active .wave-bar:nth-child(8) { animation-delay: 0.1s; }
+
+    @keyframes wave {
+      0%, 100% { height: 6px; }
+      50% { height: 32px; background: #38bdf8; }
+    }
+
+    /* Actions & Controls */
+    .controls-wrapper {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .quick-chips {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .chip-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .chip-btn:hover, .chip-btn:active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .chip-btn.yes {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .chip-btn.no {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .call-btn-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 8px;
+    }
+
+    .call-action-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.15s ease, background 0.2s;
+    }
+
+    .call-action-btn:active {
+      transform: scale(0.92);
+    }
+
+    .btn-answer {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      animation: ringBounce 1.5s infinite;
+    }
+
+    @keyframes ringBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .btn-end {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+    }
+
+    .btn-mic-toggle {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 22px;
+    }
+
+    .btn-mic-toggle.active {
+      background: var(--primary);
+      color: #090d16;
+    }
+
+    /* Success Overlay Notification */
+    .success-pill {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      color: #34d399;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      animation: fadeIn 0.4s ease;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Status Bar -->
+  <div class="top-bar">
+    <div class="agency-tag">
+      <span>💼</span>
+      <span>TalentConnect Job Agency</span>
+    </div>
+    <div id="callBadge" class="call-status-badge">Connecting...</div>
+  </div>
+
+  <!-- Caller Avatar & Information -->
+  <div class="caller-section">
+    <div class="avatar-wrapper">
+      <div id="avatarPulse" class="avatar-pulse"></div>
+      <div class="avatar-img">👩‍💼</div>
+    </div>
+    <h1 class="caller-name">Neha</h1>
+    <div class="caller-title">Senior Placement Consultant · Job Agency</div>
+    <div id="callTimer" class="call-timer" style="display: none;">00:00</div>
+  </div>
+
+  <!-- Dialogue Bubble & Transcript -->
+  <div class="dialogue-card">
+    <div class="bubble-speaker">🎙️ Neha (AI Recruiter)</div>
+    <div id="nehaSpeechText" class="dialogue-bubble">
+      Connecting your call with Neha... Please make sure your volume is turned on.
+    </div>
+    <div id="candidateSpeechText" class="user-transcript" style="display: none;">
+      Listening to you...
+    </div>
+  </div>
+
+  <!-- Waveform Visualizer -->
+  <div id="waveform" class="visualizer-container">
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+  </div>
+
+  <!-- Excel Notification Pill -->
+  <div id="excelSavedPill" class="success-pill">
+    🎉 Perfect! Your number has been saved to the Excel roster.
+  </div>
+
+  <!-- Controls & Hands-Free Interaction -->
+  <div class="controls-wrapper">
+    <!-- Quick reply buttons in case candidate prefers tapping -->
+    <div id="quickChips" class="quick-chips" style="display: none;">
+      <button class="chip-btn yes" onclick="respondCandidate('Yes, I am actively looking for a job')">
+        👍 Yes, Looking
+      </button>
+      <button class="chip-btn" onclick="respondCandidate('Who is this again?')">
+        ❓ Who is this?
+      </button>
+      <button class="chip-btn no" onclick="respondCandidate('No, I am not interested right now')">
+        ❌ Not Interested
+      </button>
+    </div>
+
+    <!-- Call Action Buttons -->
+    <div class="call-btn-row">
+      <!-- Answer Button (Shown if browser requires explicit user click to play audio) -->
+      <button id="btnAnswer" class="call-action-btn btn-answer" onclick="answerCall()" title="Answer Call">
+        📞
+      </button>
+
+      <!-- Mic Toggle (Hands-free active) -->
+      <button id="btnMic" class="call-action-btn btn-mic-toggle" style="display: none;" title="Microphone Active">
+        🎙️
+      </button>
+
+      <!-- End Call Button -->
+      <button id="btnEnd" class="call-action-btn btn-end" style="display: none;" onclick="endCall()" title="End Call">
+        🔴
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Parse URL params for candidate personalization
+    const urlParams = new URLSearchParams(window.location.search);
+    const candidateName = urlParams.get('name') || 'Candidate';
+    const candidatePhone = urlParams.get('phone') || '+91 98765 43210';
+
+    let ws = null;
+    let sessionId = 'session_' + Math.random().toString(36).substring(2, 9);
+    let recognition = null;
+    let isCallLive = false;
+    let timerInterval = null;
+    let callSeconds = 0;
+    let currentAudio = null;
+
+    // DOM references
+    const callBadge = document.getElementById('callBadge');
+    const callTimer = document.getElementById('callTimer');
+    const nehaSpeechText = document.getElementById('nehaSpeechText');
+    const candidateSpeechText = document.getElementById('candidateSpeechText');
+    const waveform = document.getElementById('waveform');
+    const quickChips = document.getElementById('quickChips');
+    const btnAnswer = document.getElementById('btnAnswer');
+    const btnMic = document.getElementById('btnMic');
+    const btnEnd = document.getElementById('btnEnd');
+    const avatarPulse = document.getElementById('avatarPulse');
+    const excelSavedPill = document.getElementById('excelSavedPill');
+
+    // Connect WebSocket
+    function connectWS() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '5090')) ? 'localhost:5090' : window.location.host;
+      ws = new WebSocket(`${protocol}//${host}`);
+
+      ws.onopen = () => {
+        console.log('✅ WebSocket Connected to Neha Voice Gateway');
+        callBadge.textContent = 'Incoming Call...';
+      };
+
+      ws.onmessage = async (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          
+          if (msg.type === 'NEHA_SPEAKS') {
+            nehaSpeechText.textContent = msg.text;
+            
+            // If candidate was interested and saved to Excel
+            if (msg.savedToExcel) {
+              excelSavedPill.style.display = 'block';
+            }
+
+            // Play Neural Voice Audio
+            if (msg.audioBase64) {
+              await playAudioBase64(msg.audioBase64, () => {
+                if (msg.shouldHangUp) {
+                  setTimeout(endCall, 2000);
+                } else {
+                  // Resume listening after Neha finishes speaking
+                  startSpeechRecognition();
+                }
+              });
+            } else {
+              if (msg.shouldHangUp) {
+                setTimeout(endCall, 2500);
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error handling message:', err);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket closed.');
+      };
+    }
+
+    // Answer Call
+    function answerCall() {
+      btnAnswer.style.display = 'none';
+      btnMic.style.display = 'flex';
+      btnEnd.style.display = 'flex';
+      quickChips.style.display = 'flex';
+      callTimer.style.display = 'inline-block';
+      callBadge.textContent = 'Call in Progress';
+      callBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+      isCallLive = true;
+
+      // Start call timer
+      timerInterval = setInterval(() => {
+        callSeconds++;
+        const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+        const secs = String(callSeconds % 60).padStart(2, '0');
+        callTimer.textContent = `${mins}:${secs}`;
+      }, 1000);
+
+      // Tell backend to start call and deliver Neha's greeting
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'START_CALL',
+          sessionId,
+          candidateName,
+          candidatePhone
+        }));
+      }
+
+      setupSpeechRecognition();
+    }
+
+    // Play Neha's Neural Voice Audio
+    function playAudioBase64(base64Str, onEnded) {
+      return new Promise((resolve) => {
+        if (currentAudio) {
+          try { currentAudio.pause(); } catch(e) {}
+        }
+
+        // Animate visualizer while speaking
+        waveform.classList.add('active');
+        avatarPulse.style.display = 'block';
+
+        const audio = new Audio('data:audio/mp3;base64,' + base64Str);
+        currentAudio = audio;
+
+        audio.onended = () => {
+          waveform.classList.remove('active');
+          avatarPulse.style.display = 'none';
+          if (onEnded) onEnded();
+          resolve();
+        };
+
+        audio.onerror = () => {
+          waveform.classList.remove('active');
+          avatarPulse.style.display = 'none';
+          if (onEnded) onEnded();
+          resolve();
+        };
+
+        audio.play().catch(e => {
+          console.warn('Auto-play blocked or audio error:', e);
+          waveform.classList.remove('active');
+          avatarPulse.style.display = 'none';
+          if (onEnded) onEnded();
+          resolve();
+        });
+      });
+    }
+
+    // Initialize Web Speech Recognition
+    function setupSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        console.warn('Web Speech API not supported in this browser. Quick buttons available.');
+        candidateSpeechText.style.display = 'block';
+        candidateSpeechText.textContent = 'Speech API not available on this browser. Please use quick buttons below.';
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-IN'; // Indian English / Global English
+
+      recognition.onstart = () => {
+        candidateSpeechText.style.display = 'block';
+        candidateSpeechText.textContent = 'Listening to your response...';
+        btnMic.classList.add('active');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log('🗣️ Candidate Spoke:', transcript);
+        candidateSpeechText.textContent = `You: "${transcript}"`;
+        respondCandidate(transcript);
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('Speech recognition error:', event.error);
+        btnMic.classList.remove('active');
+      };
+
+      recognition.onend = () => {
+        btnMic.classList.remove('active');
+      };
+    }
+
+    function startSpeechRecognition() {
+      if (recognition && isCallLive) {
+        try {
+          recognition.start();
+        } catch (e) {
+          // Ignore if already started
+        }
+      }
+    }
+
+    // Send candidate's response to Neha
+    function respondCandidate(text) {
+      candidateSpeechText.style.display = 'block';
+      candidateSpeechText.textContent = `You: "${text}"`;
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'CANDIDATE_SPEECH',
+          sessionId,
+          text
+        }));
+      }
+    }
+
+    // End Call
+    function endCall() {
+      isCallLive = false;
+      clearInterval(timerInterval);
+      if (currentAudio) {
+        try { currentAudio.pause(); } catch(e) {}
+      }
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+
+      callBadge.textContent = 'Call Ended';
+      callBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+      callBadge.style.color = '#f87171';
+      waveform.classList.remove('active');
+      avatarPulse.style.display = 'none';
+      quickChips.style.display = 'none';
+      btnMic.style.display = 'none';
+      btnEnd.style.display = 'none';
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'END_CALL', sessionId }));
+      }
+    }
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+      connectWS();
+    });
+  </script>
+</body>
+</html>

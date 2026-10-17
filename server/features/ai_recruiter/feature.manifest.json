@@ -1,0 +1,9 @@
+{
+  "id": "ai_recruiter",
+  "name": "AI Recruiter Voice Agent",
+  "description": "Handles voice synthesis, intent recognition, and WebSocket stream",
+  "basePath": "/api",
+  "routes": "routes.js",
+  "boot": "boot.js",
+  "enabled": true
+}

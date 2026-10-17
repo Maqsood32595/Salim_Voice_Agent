@@ -1,0 +1,21 @@
+{
+  "name": "salim-webassembly-voice-agent",
+  "version": "2.0.0",
+  "description": "Salim AI Voice Recruiter with AssemblyAI Real-Time Streaming & Twilio Media Streams",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "cors": "^2.8.6",
+    "express": "^4.21.2",
+    "msedge-tts": "^2.0.7",
+    "pg": "^8.11.3",
+    "twilio": "^5.4.0",
+    "ws": "^8.18.0",
+    "xlsx": "^0.18.5"
+  }
+}
