@@ -43,7 +43,7 @@ export class NehaBrain {
     const session = this.getSession(sessionId);
     const hasName = session && session.candidateName && session.candidateName !== 'Candidate' && session.candidateName.trim() !== '';
     const greetingStart = hasName ? `Hi ${session.candidateName.trim()}!` : 'Hi!';
-    const text = `${greetingStart} This is Neha calling on behalf of Prodigy Hunters. Are you currently looking out for a job?`;
+    const text = `${greetingStart} This is Neha calling on behalf of Prodigy Hunters. Are you currently looking out for a job? You can say Yes or No.`;
     
     if (session) {
       session.state = CALL_STATES.WAITING_FOR_INTEREST;
@@ -136,7 +136,7 @@ export class NehaBrain {
       session.state = CALL_STATES.WAITING_FOR_INTEREST;
     } 
     else {
-      replyText = "Got it! Just to quickly confirm, are you open to exploring any new job opportunities at the moment?";
+      replyText = "Got it! Just to quickly confirm, are you open to exploring any new job opportunities at the moment? You can say Yes or No.";
       session.state = CALL_STATES.WAITING_FOR_INTEREST;
     }
 
