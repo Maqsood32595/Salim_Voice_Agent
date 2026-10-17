@@ -17,5 +17,7 @@ services:
         sync: false
       - key: ASSEMBLYAI_API_KEY
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false
       - key: PUBLIC_URL
         sync: false

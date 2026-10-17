@@ -102,7 +102,7 @@ router.post('/answered', async (req, res) => {
     language:      'en-IN',
     hints:         'yes, yeah, definitely, sure, looking, job, open to work, hiring, no, not looking, not interested',
     bargeIn:       false,
-    timeout:       10,
+    timeout: 5,
   });
 
   gather.say({ voice: 'Polly.Aditi', language: 'en-IN' }, greeting.text);
@@ -191,21 +191,50 @@ router.post('/respond', async (req, res) => {
   res.type('text/xml').send(twiml.toString());
 });
 
-// --- 4. Silence timeout ---------------------------------------------------
+// --- 4. Silence timeout (Two-Stage Silence Handling) ----------------------
 router.post('/timeout', (req, res) => {
   const sessionId = req.query.sessionId;
-  console.log(`[Twilio Timeout]: Silence timeout for session ${sessionId}. Playing polite goodbye.`);
-
-  logEvent({
-    type: 'CALL_TIMEOUT_SILENCE',
-    sessionId,
-    notes: 'No speech was detected before timeout'
-  });
-
+  const attempt = parseInt(req.query.attempt || '1', 10);
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
-  twiml.say({ voice: 'Polly.Aditi', language: 'en-IN' },
-    "Sorry, I couldn't hear your response. Please feel free to call us back anytime. Have a great day!");
+
+  if (attempt === 1) {
+    // Stage 1: Silent for 5 seconds -> Ask to repeat
+    console.log(`[Twilio Timeout]: 5s silence for session ${sessionId}. Asking to repeat response.`);
+    logEvent({
+      type: 'SILENCE_REPROMPT_5S',
+      sessionId,
+      attempt: 1
+    });
+
+    const gather = twiml.gather({
+      input:         'speech dtmf',
+      action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
+      method:        'POST',
+      speechTimeout: 'auto',
+      speechModel:   'phone_call',
+      language:      'en-IN',
+      hints:         'yes, yeah, definitely, sure, looking, job, open, no, not interested',
+      bargeIn:       false,
+      timeout:       5, // 5 more seconds
+    });
+    gather.say({ voice: 'Polly.Aditi', language: 'en-IN' }, "Can you please repeat your response?");
+    
+    // If still silent after 5 more seconds -> Stage 2 (10s total auto-hangup)
+    twiml.redirect(`${base(req)}/api/twilio/timeout?sessionId=${sessionId}&attempt=2`);
+    return res.type('text/xml').send(twiml.toString());
+  }
+
+  // Stage 2: Silent for 10 seconds total -> Auto-disconnect cleanly
+  console.log(`[Twilio Timeout]: 10s silence for session ${sessionId}. Auto-disconnecting line.`);
+  logEvent({
+    type: 'CALL_AUTO_DISCONNECT_10S',
+    sessionId,
+    attempt: 2,
+    notes: 'Auto-hangup after 10 seconds of silence'
+  });
+
+  twiml.say({ voice: 'Polly.Aditi', language: 'en-IN' }, "Have a great day!");
   twiml.hangup();
   res.type('text/xml').send(twiml.toString());
 });
