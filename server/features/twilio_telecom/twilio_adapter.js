@@ -4,6 +4,20 @@ import { nehaBrain } from '../ai_recruiter/core/neha-brain.js';
 
 const router = express.Router();
 
+// In-memory diagnostic ring buffer to inspect exact speech recognition output
+const recentCallLogs = [];
+
+function logEvent(event) {
+  const item = {
+    time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    timestamp: new Date().toISOString(),
+    ...event
+  };
+  recentCallLogs.unshift(item);
+  if (recentCallLogs.length > 50) recentCallLogs.pop();
+  return item;
+}
+
 // --- Twilio Client ----------------------------------------------------------
 function getClient() {
   const sid   = process.env.TWILIO_ACCOUNT_SID;
@@ -13,7 +27,7 @@ function getClient() {
 }
 
 /**
- * Public webhook base - your server must be reachable by Twilio.
+ * Public webhook base - intelligently detects Render HTTPS URL.
  */
 function base(req) {
   if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
@@ -38,45 +52,62 @@ router.post('/dial', async (req, res) => {
       url:  `${base(req)}/api/twilio/answered?sessionId=${sessionId}&name=${encodeURIComponent(name)}`,
     });
 
+    logEvent({
+      type: 'DIAL_INITIATED',
+      callSid: call.sid,
+      sessionId,
+      name,
+      phone
+    });
+
     console.log(`[Twilio] Dialling ${name} (${phone}) SID: ${call.sid}`);
     res.json({ success: true, callSid: call.sid, sessionId, name, phone });
   } catch (err) {
     console.error('[Twilio] Dial error:', err.message);
+    logEvent({ type: 'DIAL_ERROR', error: err.message, phone, name });
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// --- 2. Call answered - play Neha greeting inside Gather (Instant Barge-In + Fast Timeout) ---
+// --- 2. Call answered - play Neha greeting inside Gather -----------------
 // POST /api/twilio/answered  (Twilio webhook)
 router.post('/answered', async (req, res) => {
   const sessionId = req.query.sessionId || `twilio-${Date.now()}`;
   const name      = decodeURIComponent(req.query.name || 'Candidate');
 
   if (!nehaBrain.getSession(sessionId)) {
-    nehaBrain.createSession(sessionId, { name, phone: req.body.To || '' });
+    nehaBrain.createSession(sessionId, { name, phone: req.body.To || req.body.From || '' });
   }
 
   const greeting = await nehaBrain.getInitialGreeting(sessionId);
   console.log(`[Neha Greeting]: "${greeting.text}"`);
 
+  logEvent({
+    type: 'CALL_ANSWERED',
+    sessionId,
+    candidateName: name,
+    greetingPlayed: greeting.text
+  });
+
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
 
-  // Nest <Say> inside <Gather> for zero-gap listening and instant response
+  // bargeIn: false ensures speakerphone audio does NOT cut off Neha mid-sentence
   const gather = twiml.gather({
-    input:         'speech',
+    input:         'speech dtmf', // Accepts voice OR pressing 1 (Yes) / 2 (No)
     action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
     method:        'POST',
-    speechTimeout: '1', // Triggers 1 second after candidate stops speaking (eliminates 3s lag)
+    speechTimeout: 'auto',
     speechModel:   'phone_call',
     language:      'en-IN',
-    hints:         'yes, yeah, definitely, sure, looking, job, open, no, not looking, not interested, who is this',
-    timeout:       7,
+    hints:         'yes, yeah, definitely, sure, looking, job, open to work, hiring, no, not looking, not interested',
+    bargeIn:       false,
+    timeout:       10,
   });
 
   gather.say({ voice: 'Polly.Aditi', language: 'en-IN' }, greeting.text);
 
-  // If candidate stays completely silent after 7s, redirect to polite timeout
+  // If candidate stays completely silent after 10s, redirect to polite timeout
   twiml.redirect(`${base(req)}/api/twilio/timeout?sessionId=${sessionId}`);
   res.type('text/xml').send(twiml.toString());
 });
@@ -85,25 +116,37 @@ router.post('/answered', async (req, res) => {
 // POST /api/twilio/respond  (Twilio webhook)
 router.post('/respond', async (req, res) => {
   const sessionId  = req.query.sessionId;
-  const speechText = req.body.SpeechResult || '';
+  let speechText = (req.body.SpeechResult || '').trim();
   const confidence = req.body.Confidence || 'unknown';
+  const digits     = req.body.Digits || '';
 
-  console.log(`[Candidate Speech]: "${speechText}" (Confidence: ${confidence})`);
+  // Support DTMF keypad: 1 = Yes, 2 = No
+  if (!speechText && digits === '1') speechText = 'Yes';
+  if (!speechText && digits === '2') speechText = 'No';
+
+  console.log(`[Candidate Speech]: "${speechText}" (Confidence: ${confidence}, Digits: "${digits}")`);
 
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
 
-  if (!speechText.trim()) {
+  if (!speechText) {
     console.log(`[Twilio]: Empty speech recognized, asking candidate to clarify.`);
+    logEvent({
+      type: 'EMPTY_SPEECH_REPROMPT',
+      sessionId,
+      rawBody: req.body
+    });
+
     const gather = twiml.gather({
-      input:         'speech',
+      input:         'speech dtmf',
       action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
       method:        'POST',
-      speechTimeout: '1',
+      speechTimeout: 'auto',
       speechModel:   'phone_call',
       language:      'en-IN',
       hints:         'yes, yeah, definitely, sure, looking, job, open, no, not interested',
-      timeout:       6,
+      bargeIn:       false,
+      timeout:       8,
     });
     gather.say({ voice: 'Polly.Aditi', language: 'en-IN' },
       "Sorry, I did not catch that. Are you currently looking out for a job?");
@@ -114,20 +157,32 @@ router.post('/respond', async (req, res) => {
   const turn = await nehaBrain.processCandidateTurn(sessionId, speechText);
   console.log(`[Neha Reply]: "${turn.replyText}" (Intent: ${turn.intent}, Saved: ${turn.savedToExcel})`);
 
+  logEvent({
+    type: 'SPEECH_RECOGNIZED_AND_PROCESSED',
+    sessionId,
+    candidateSpoke: speechText,
+    confidence,
+    digits,
+    detectedIntent: turn.intent,
+    nehaReply: turn.replyText,
+    savedToExcel: turn.savedToExcel
+  });
+
   if (turn.shouldHangUp) {
     twiml.say({ voice: 'Polly.Aditi', language: 'en-IN' }, turn.replyText);
     twiml.pause({ length: 1 });
     twiml.hangup();
   } else {
     const gather = twiml.gather({
-      input:         'speech',
+      input:         'speech dtmf',
       action:        `${base(req)}/api/twilio/respond?sessionId=${sessionId}`,
       method:        'POST',
-      speechTimeout: '1',
+      speechTimeout: 'auto',
       speechModel:   'phone_call',
       language:      'en-IN',
       hints:         'yes, yeah, definitely, sure, looking, job, open, no, not interested',
-      timeout:       6,
+      bargeIn:       false,
+      timeout:       8,
     });
     gather.say({ voice: 'Polly.Aditi', language: 'en-IN' }, turn.replyText);
     twiml.redirect(`${base(req)}/api/twilio/timeout?sessionId=${sessionId}`);
@@ -141,6 +196,12 @@ router.post('/timeout', (req, res) => {
   const sessionId = req.query.sessionId;
   console.log(`[Twilio Timeout]: Silence timeout for session ${sessionId}. Playing polite goodbye.`);
 
+  logEvent({
+    type: 'CALL_TIMEOUT_SILENCE',
+    sessionId,
+    notes: 'No speech was detected before timeout'
+  });
+
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
   twiml.say({ voice: 'Polly.Aditi', language: 'en-IN' },
@@ -152,14 +213,27 @@ router.post('/timeout', (req, res) => {
 // --- 5. Call status updates -----------------------------------------------
 router.post('/status', (req, res) => {
   const { CallSid, CallStatus, AnsweredBy } = req.body;
-  if (AnsweredBy === 'machine_start' || AnsweredBy === 'machine_end_beep') {
-    console.log(`[Twilio] Voicemail detected for ${CallSid} - skipping.`);
-  }
+  logEvent({
+    type: 'CALL_STATUS_UPDATE',
+    callSid: CallSid,
+    callStatus: CallStatus,
+    answeredBy: AnsweredBy
+  });
   console.log(`[Twilio Status] ${CallSid} -> ${CallStatus}`);
   res.sendStatus(200);
 });
 
-// --- 6. Account info (check trial limits) ---------------------------------
+// --- 6. Live Speech Diagnostics API --------------------------------------
+// GET /api/twilio/logs -> returns exact speech recognition output
+router.get('/logs', (req, res) => {
+  res.json({
+    success: true,
+    count: recentCallLogs.length,
+    logs: recentCallLogs
+  });
+});
+
+// --- 7. Account info ------------------------------------------------------
 router.get('/account', async (req, res) => {
   try {
     const client  = getClient();
