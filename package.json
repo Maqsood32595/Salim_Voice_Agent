@@ -1,18 +1,19 @@
 {
-  "name": "prodigy-hunters",
-  "version": "1.0.0",
-  "description": "Voice Agent using Fractal Kernel Architecture",
+  "name": "prodigy-hunters-neha",
+  "version": "2.0.0",
+  "description": "Neha AI Recruiter � Twilio outbound calling edition",
   "type": "module",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^4.21.2",
     "msedge-tts": "^2.0.7",
     "pg": "^8.11.3",
-    "ws": "^8.18.0",
+    "twilio": "^5.4.0",
     "xlsx": "^0.18.5"
   }
 }

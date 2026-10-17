@@ -5,16 +5,25 @@ import { pgLogger } from './core/pg-logger.js';
 
 export async function boot(app, server, kernel) {
   // Pre-warm neural TTS voices
-  await nehaVoice.prewarm();
+  // Twilio Polly.Aditi handles voice directly
+  // await nehaVoice.prewarm();
 
   // Connect to DB if configured (using provided SUPABASE URL)
-  const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:Oraib@123@db.wxzphkzixtolcgxfpyrx.supabase.co:5432/postgres';
+  const dbUrl = process.env.DATABASE_URL || null;
   if (dbUrl) {
     await pgLogger.connect(dbUrl);
   }
 
-  // Setup WebSocket on the shared HTTP Server
-  const wss = new WebSocketServer({ server });
+  // Setup WebSocket on the shared HTTP Server for browser call interface
+  const wss = new WebSocketServer({ noServer: true });
+
+  server.on('upgrade', (request, socket, head) => {
+    if (request.url !== '/freeswitch-stream') {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+      });
+    }
+  });
 
   wss.on('connection', (ws) => {
     let activeSessionId = null;

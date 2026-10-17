@@ -379,8 +379,13 @@
         </div>
 
         <button class="btn-primary" onclick="generateLink()">
-          <span>⚡ Generate & Launch Call</span>
+          <span>🚀 Generate Web Call Link</span>
         </button>
+
+        <button class="btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-top: 10px;" onclick="dialTwilioPhone()">
+          <span>📞 Call Phone Directly via Twilio</span>
+        </button>
+        <div id="twilioStatusBox" style="display: none; margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 13px;"></div>
 
         <div id="linkBox" class="link-result-box" style="display: none;">
           <div class="stat-label">Candidate Call URL:</div>
@@ -583,6 +588,38 @@
       generateLink();
       loadCandidates();
     });
+  
+    async function dialTwilioPhone() {
+      const name = document.getElementById('inputName').value.trim() || 'Candidate';
+      const phone = document.getElementById('inputPhone').value.trim();
+      if (!phone) {
+        alert('Please enter a phone number (e.g. +919980901155)');
+        return;
+      }
+      const statusBox = document.getElementById('twilioStatusBox');
+      statusBox.style.display = 'block';
+      statusBox.style.color = '#38bdf8';
+      statusBox.innerHTML = '⏳ Dialling <strong>' + name + '</strong> at <code>' + phone + '</code> via Twilio...';
+      try {
+        const res = await fetch('/api/twilio/dial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone })
+        });
+        const data = await res.json();
+        if (data.success) {
+          statusBox.style.color = '#4ade80';
+          statusBox.innerHTML = '✅ <strong>Call Initiated!</strong> Call SID: <code>' + data.callSid + '</code><br>Neha will greet: <em>"Hi ' + name + '! This is Neha calling on behalf of Prodigy Hunters..."</em>';
+        } else {
+          statusBox.style.color = '#f87171';
+          statusBox.innerHTML = '❌ <strong>Dial Error:</strong> ' + data.error;
+        }
+      } catch (err) {
+        statusBox.style.color = '#f87171';
+        statusBox.innerHTML = '❌ <strong>Network Error:</strong> ' + err.message;
+      }
+    }
+
   </script>
 </body>
 </html>

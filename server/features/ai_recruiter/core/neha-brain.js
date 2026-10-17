@@ -41,21 +41,18 @@ export class NehaBrain {
    */
   async getInitialGreeting(sessionId) {
     const session = this.getSession(sessionId);
-    const namePart = (session && session.candidateName && session.candidateName !== 'Candidate')
-      ? `Hi ${session.candidateName}!`
-      : 'Hi!';
-
-    const text = `${namePart} This is Neha calling on behalf of Prodigy Hunters. Are you currently looking out for a job?`;
+    const hasName = session && session.candidateName && session.candidateName !== 'Candidate' && session.candidateName.trim() !== '';
+    const greetingStart = hasName ? `Hi ${session.candidateName.trim()}!` : 'Hi!';
+    const text = `${greetingStart} This is Neha calling on behalf of Prodigy Hunters. Are you currently looking out for a job?`;
     
     if (session) {
       session.state = CALL_STATES.WAITING_FOR_INTEREST;
       session.turns.push({ role: 'neha', text, timestamp: Date.now() });
     }
 
-    const audioBuffer = await nehaVoice.synthesize(text);
     return {
       text,
-      audioBase64: audioBuffer ? audioBuffer.toString('base64') : null,
+      audioBase64: null,
       state: CALL_STATES.WAITING_FOR_INTEREST
     };
   }
@@ -145,7 +142,8 @@ export class NehaBrain {
 
     session.turns.push({ role: 'neha', text: replyText, timestamp: Date.now() });
 
-    const audioBuffer = await nehaVoice.synthesize(replyText);
+    // Voice is natively rendered by Twilio Polly.Aditi
+    const audioBuffer = null;
 
     return {
       replyText,
