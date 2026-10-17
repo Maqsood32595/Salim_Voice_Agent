@@ -205,7 +205,7 @@ router.post('/timeout', (req, res) => {
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
   twiml.say({ voice: 'Polly.Aditi', language: 'en-IN' },
-    "Sorry, I couldn't hear your response. Please feel free to call us back anytime. Have a great day, goodbye!");
+    "Sorry, I couldn't hear your response. Please feel free to call us back anytime. Have a great day!");
   twiml.hangup();
   res.type('text/xml').send(twiml.toString());
 });

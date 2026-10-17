@@ -109,7 +109,7 @@ export class NehaBrain {
     let savedToExcel = false;
 
     if (intent === 'YES_INTERESTED') {
-      replyText = "Thank you so much! I have noted down your number. Our senior recruitment team will reach out to you shortly with matching job openings. Have a wonderful day ahead!";
+      replyText = "Thank you so much! I have noted down your number. Our senior recruitment team will reach out to you shortly with matching job openings. Have a great day!";
       session.state = CALL_STATES.COMPLETED_INTERESTED;
       shouldHangUp = true;
 
@@ -128,7 +128,7 @@ export class NehaBrain {
       }
     } 
     else if (intent === 'NO_NOT_INTERESTED') {
-      replyText = "No problem at all! Thank you so much for your time, and I wish you all the very best. Have a great day, goodbye!";
+      replyText = "No problem at all! Thank you so much for your time, and I wish you all the very best. Have a great day!";
       session.state = CALL_STATES.COMPLETED_NOT_INTERESTED;
       shouldHangUp = true;
       // As requested: "if it says no leave it" -> NOT saved to Excel
